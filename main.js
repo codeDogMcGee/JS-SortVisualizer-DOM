@@ -200,12 +200,12 @@ function renderArray(arr, yellowCols, cyanCols = []) {
         } else if (cyanCols.includes(i)){
             backgroundColor = "cyan";
         }else {
-            backgroundColor = "blue";
+            backgroundColor = "#035aa6";
         }
 
         const arrayDivAttributes = {
             "id": "array-col-" + i++, 
-            "style": "height:" + valuePercentage + "%; flex-grow: 1; background-color: " + backgroundColor,
+            "style": "height:" + valuePercentage + "%; flex-grow: 1; background-color: " + backgroundColor
         };
 
         // create new div and set attributes

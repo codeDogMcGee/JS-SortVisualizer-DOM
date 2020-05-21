@@ -1,3 +1,7 @@
+:root {
+    --main-color: #035aa6;
+  }
+
 body {
     height: 100%;
     background-color: #ffff;
@@ -42,7 +46,7 @@ button {
 }
 
 .sort-button {
-    background-color: blue;
+    background-color: var(--main-color);
     color: #ffff;
 }
 
@@ -60,12 +64,17 @@ button {
 }
 
 .slider-div-child {
-    width: 50%;
+    width: 100%;
     margin: 0 2%;
     display: flex;
     flex-wrap: nowrap;
     align-items: center;
     justify-content: space-evenly;
+}
+
+.slider-delay-label {
+    /* to line the sliders up */
+    margin-right: 32px;
 }
 
 .slider {
@@ -77,6 +86,7 @@ button {
     opacity: 0.7;
     -webkit-transition: .2s;
     transition: opacity .2s;
+    border-radius: 10px;
   }
   
   .slider:hover {
@@ -88,7 +98,7 @@ button {
     appearance: none;
     width: 25px;
     height: 25px;
-    background: blue;
+    background: var(--main-color);
     border-radius: 50%;
     cursor: pointer;
   }
@@ -116,6 +126,8 @@ button {
 #plot div {
     border: solid;
     border-width: thin;
+    border-top-left-radius: 3px;
+    border-top-right-radius: 3px;
 }
 
 @media only screen and (max-width: 600px) {
@@ -127,13 +139,14 @@ button {
     .slider-div-child {
         width: 80%;
     }
+    .slider {
+        margin-right: 20px;
+    }
 
     .input-container {
         font-size: 1em;
     }
-}
 
-@media only screen and (max-width: 400px) {
     .buttons-div {
         flex-direction: column;
     }
@@ -141,6 +154,6 @@ button {
 
 @media only screen and (max-height: 825px) {
     .output-container {
-        height: 400px;
+        height: 350px;
     }
 }
