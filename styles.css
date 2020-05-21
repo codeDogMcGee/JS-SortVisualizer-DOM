@@ -112,8 +112,6 @@ button {
 }
 
 #plot {
-    border: solid;
-    border-width: thin;
     width:100%;
     margin: 5% 10%;
     padding: 10px 20px;
