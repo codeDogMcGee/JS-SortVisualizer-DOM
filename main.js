@@ -60,32 +60,32 @@ function getIndexInPlayList(fragList, mainList) {
     return indexArr;
 }
 
-function timeoutP(p, ms) { 
-    paused = true
-    return new Promise(resolve => {
-      setTimeout(() => {
-        resolve(false);
-      }, ms);
-    });
-}
-
-// let timeoutCounter = 1;
-// paused = false;
 async function merge(arr1, arr2, delayMs, origArray) {
     
-    console.log('pause')
-    await timeout(1000)
+
     
     // figure out which elements of the original array are in play
     const arr3 = arr1.slice().concat(arr2.slice());
     const indexInPlay = getIndexInPlayList(arr3, origArray);
+
+    let notInPlay = [];
+    let i = 0;
+    origArray.forEach( pair => {
+        if (!indexInPlay.includes(i)) {
+            notInPlay.push(i);
+        }
+        i++
+    });
+
+    renderArray(pairsToSingle(origArray, 0), indexInPlay, notInPlay);
+    await timeout(1000)
 
     // renderArray(pairsToSingle(origArray, 0), indexInPlay);
     
     // filter the two arrays passed in
     const joinArrs = filterArrays(arr1, arr2);
 
-    let i = 0;
+    i = 0;
     indexInPlay.forEach( ind => {
         origArray[ind] = joinArrs[i]; 
         i++;
@@ -93,7 +93,7 @@ async function merge(arr1, arr2, delayMs, origArray) {
 
     //renderArray(pairsToSingle(origArray, 0), pulledIndexArr);
     
-    // renderArray(pairsToSingle(origArray, 0), []);
+    
     // console.log('pause')
     // await timeout(1000)
 
@@ -132,7 +132,7 @@ async function sort(arr, delayMs) {
     // renderArray(pairsToSingle(origArray, 0), []);
     // console.log('pause')
     // await timeout(1000)
-    renderArray(pairsToSingle(origArray, 0), []);
+    // renderArray(pairsToSingle(origArray, 0), []);
 
     return new Promise( resolve => {
         resolve( m );
@@ -198,7 +198,7 @@ function setAttributes(el, attrs) {
     }
 }
 
-function renderArray(arr, yellowCols) {
+function renderArray(arr, yellowCols, cyanCols = []) {
 
     // get the parent div
     let plotContainter = document.getElementById("plot");
@@ -217,8 +217,10 @@ function renderArray(arr, yellowCols) {
         // set the background color to yellow if indicated
         let backgroundColor;
         if (yellowCols.includes(i)) {
-            backgroundColor = "orange";
-        } else {
+            backgroundColor = "yellow";
+        } else if (cyanCols.includes(i)){
+            backgroundColor = "cyan";
+        }else {
             backgroundColor = "blue";
         }
 
@@ -260,8 +262,8 @@ async function performMergeSort() {
 
     arrIndex = [...Array(currentArray.length).keys()];
     mappedArr = currentArray.map( (e, i) =>  [e, arrIndex[i]] );
-    
-    origArray = mappedArr.slice();
+
+    origArray = mappedArr.slice(); // reset the origArray to the mapped currentArray
     currentArray = await mergeSort(mappedArr, delayMs);
     
     renderArray(currentArray, []);
