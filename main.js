@@ -30,6 +30,7 @@ function timeout(ms) {
     });
 }
 
+// turn 2d array, like [[0,"hello"], [1,"world"]], into 1d array
 function pairsToSingle(pairsArr, index) {
     let singleArr = []
     pairsArr.forEach( pair => {
@@ -38,7 +39,8 @@ function pairsToSingle(pairsArr, index) {
     return singleArr
 }
 
-function filterArrays(arr1, arr2) {
+// sort the array sides and merge together
+function sortCombineArrays(arr1, arr2) {
     let arr = [];
     while (arr1.length && arr2.length) {
         if (arr1[0][0] < arr2[0][0]) { // since using shift can continually check for the first element
@@ -50,6 +52,7 @@ function filterArrays(arr1, arr2) {
     return arr.concat(arr1.slice().concat(arr2.slice()));
 }
 
+// return the indices of the render list that are being calculated, to turn yellow
 function getIndexInPlayList(fragList, mainList) {
     let indexArr = [];
     let pulledIndex;
@@ -60,57 +63,47 @@ function getIndexInPlayList(fragList, mainList) {
     return indexArr;
 }
 
-async function merge(arr1, arr2, delayMs, origArray) {
-    
-
-    
+// all of the promises, awaits, and async funcs are because of the delay needed to plot
+// merge two arrays
+async function merge(arr1, arr2, delayMs) {    
     // figure out which elements of the original array are in play
     const arr3 = arr1.slice().concat(arr2.slice());
-    const indexInPlay = getIndexInPlayList(arr3, origArray);
+    const indexInPlay = getIndexInPlayList(arr3, renderedArrayMergeSort);
 
     let notInPlay = [];
     let i = 0;
-    origArray.forEach( pair => {
+    renderedArrayMergeSort.forEach( pair => {
         if (!indexInPlay.includes(i)) {
             notInPlay.push(i);
         }
         i++
     });
 
-    renderArray(pairsToSingle(origArray, 0), indexInPlay, notInPlay);
-    await timeout(1000)
+    if (delayMs) {
+        // render the 
+        renderArray(pairsToSingle(renderedArrayMergeSort, 0), indexInPlay, notInPlay);
+        await timeout(delayMs);
+    }
 
-    // renderArray(pairsToSingle(origArray, 0), indexInPlay);
-    
     // filter the two arrays passed in
-    const joinArrs = filterArrays(arr1, arr2);
+    const joinArrs = sortCombineArrays(arr1, arr2);
 
+    // update the array to be rendered
     i = 0;
     indexInPlay.forEach( ind => {
-        origArray[ind] = joinArrs[i]; 
+        renderedArrayMergeSort[ind] = joinArrs[i]; 
         i++;
     });
-
-    //renderArray(pairsToSingle(origArray, 0), pulledIndexArr);
-    
-    
-    // console.log('pause')
-    // await timeout(1000)
-
-    
-
 
     return new Promise( resolve => {
         resolve( joinArrs );
     });
-    
 }
 
-let origArray; // declare global variable
+let renderedArrayMergeSort; // declare global variable
+// splits two arrays recusively and sends to merge()
 async function sort(arr, delayMs) {
-    
-
-    origArray = origArray || arr.slice(); // set global variable
+    renderedArrayMergeSort = renderedArrayMergeSort || arr.slice(); // set global variable
 
     if (arr.length < 2) {
         return arr;
@@ -122,17 +115,14 @@ async function sort(arr, delayMs) {
     // seperate arrays into left and right
     const leftArr = arr.slice(0, mid);
     const rightArr = arr.slice(mid);
+
+    // split all the way down to individual parts and merge
     const sl = sort(leftArr, delayMs);
     const sr = sort(rightArr, delayMs);
 
     // merge two arrays after sorting recursively    
-    // return await merge(await sl, await sr, delayMs, origArray );
-    m = await merge( await sl, await sr, delayMs, origArray ) 
-
-    // renderArray(pairsToSingle(origArray, 0), []);
-    // console.log('pause')
-    // await timeout(1000)
-    // renderArray(pairsToSingle(origArray, 0), []);
+    // have to await everywhere because of teh delay
+    m = merge( await sl, await sr, delayMs ) 
 
     return new Promise( resolve => {
         resolve( m );
@@ -140,27 +130,16 @@ async function sort(arr, delayMs) {
 }
 
 async function mergeSort(arr, delayMs) {
+    // run the sorter on the array
     const sortedList = await sort(arr, delayMs);
 
+    // reduce to a 1d array
     sortedListValues = pairsToSingle(sortedList, 0)
 
     return new Promise( resolve => {
         resolve( sortedListValues );
     });
 }
-
-async function runMergeSort() {
-    n = 5;
-    a = randomArray(n,1,10)
-    b = [...Array(n).keys()];
-    c = a.map( (e, i) => {
-        return [e, b[i]];
-    });
-    console.log("Starting: ", c)
-    returnList = await mergeSort(c, 2000);
-    console.log("Ending: ", returnList)
-};
-//runMergeSort();
 
 async function bubbleSortAsync(arr, delayMs) {
     let swapsConducted = 1;
@@ -240,22 +219,15 @@ function renderArray(arr, yellowCols, cyanCols = []) {
 
 function getNewArray() {
     const arraySize = Number(document.getElementById("slider-array-size-output").innerHTML)
-
     currentArray = randomArray(arraySize, 5, 1000);
     renderArray(currentArray, []);
 }
 
 async function performBubbleSort() {
     const delayMs = Number(document.getElementById("slider-delay-output").innerHTML)
-    currentArray = await bubbleSortAsync(currentArray, delayMs / 100);
+    currentArray = await bubbleSortAsync(currentArray, delayMs / 3);
     renderArray(currentArray, []);
 }
-
-// async function performMergeSort() {
-//     const delayMs = Number(document.getElementById("slider-delay-output").innerHTML)
-//     currentArray = await mergeSort(currentArray, delayMs);
-//     renderArray(currentArray, []);
-// }
 
 async function performMergeSort() {
     const delayMs = Number(document.getElementById("slider-delay-output").innerHTML)
@@ -263,8 +235,8 @@ async function performMergeSort() {
     arrIndex = [...Array(currentArray.length).keys()];
     mappedArr = currentArray.map( (e, i) =>  [e, arrIndex[i]] );
 
-    origArray = mappedArr.slice(); // reset the origArray to the mapped currentArray
-    currentArray = await mergeSort(mappedArr, delayMs);
+    renderedArrayMergeSort = mappedArr.slice(); // reset the origArray to the mapped currentArray
+    currentArray = await mergeSort(mappedArr, delayMs * 10);
     
     renderArray(currentArray, []);
 }
